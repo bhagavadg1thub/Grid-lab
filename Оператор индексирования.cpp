@@ -10,11 +10,11 @@ private:
     T* data;
     size_type y_size, x_size;
 
-    // Вспомогательный класс для оператора []
+    // Вспомогательный класс для оператора [] - однострочная матрица
     class Proxy {
     private:
-        T* row;
-        size_type size;
+        T* row; // ссылка на начало строки
+        size_type size; // длина строки
     public:
         Proxy(T* row, size_type size) : row(row), size(size) {}
         
@@ -120,11 +120,11 @@ public:
     }
     
     // Оператор индексирования [] для двойного доступа
-    Proxy operator[](size_type y_idx) {
-        return Proxy(&data[y_idx * x_size], x_size);
+    Proxy operator[](size_type y_idx) { // принимает в квадратных скобках значение y_idx
+        return Proxy(&data[y_idx * x_size], x_size); // по формуле считает номер элемента, отвечающий за начало этой строки. Возвращает ссылку на него
     }
     
-    const Proxy operator[](size_type y_idx) const {
+    const Proxy operator[](size_type y_idx) const { // то же самое, только возвращает значение
         return Proxy(&data[y_idx * x_size], x_size);
     }
 };
