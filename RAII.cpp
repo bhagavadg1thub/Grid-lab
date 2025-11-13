@@ -1,8 +1,9 @@
-template <typename T>
+template <typename T> // T - любой тип файлов
+
 class Grid final {
 public:
-    using value_type = T;
-    using size_type = unsigned;
+    using value_type = T; 
+    using size_type = unsigned; // unsigned - как инт, но только неотрицательные
     
 private:
     T* data;           // Указатель на массив
@@ -10,63 +11,75 @@ private:
     size_type x_size;  // Количество столбцов
 
 public:
-    // 1. Конструктор с одним параметром (сетка 1x1)
+    // 1. Конструктор с одним параметром 
     Grid(T const &t) : data(new T[1]), y_size(1), x_size(1) {
         data[0] = t;
     }
+
+// Пример: Grid<int> grid1(42); - создает сетку 1x1 с числом 42
     
-    // 2. Конструктор с двумя параметрами (размеры)
+    // 2. Конструктор с двумя размерными параметрами 
     Grid(size_type y_size, size_type x_size) 
     : data(new T[y_size * x_size]), y_size(y_size), x_size(x_size) {
-        // Элементы инициализируются конструктором по умолчанию
+        // Внутри эелементов хранится мусор
     }
+
+// Пример: Grid<float> grid2(2, 3); - создает сетку 2x3 с абы какими элементами 
     
-    // 3. Конструктор с тремя параметрами (размеры + значение)
+    // 3. Конструктор с тремя параметрами - размеры и значениЕ (одно, во всех одинаковое)
     Grid(size_type y_size, size_type x_size, T const &t) 
     : data(new T[y_size * x_size]), y_size(y_size), x_size(x_size) {
         for (size_type i = 0; i < y_size * x_size; ++i) {
             data[i] = t;
         }
     }
+
+// Пример: Grid<string> grid3(2, 2, "hello"); - создает сетку 2x2, где каждая клетка заполнена "hello"
     
-    // Деструктор - освобождает память
+    // РАЗ - Деструкт ор
     ~Grid() {
         delete[] data;
     }
     
-    // Конструктор копирования
-    Grid(Grid const &other) 
-    : data(new T[other.y_size * other.x_size]), 
-      y_size(other.y_size), x_size(other.x_size) {
+    // ДВА - Конструктор копирования (создает новую сетку и копирует существующую)
+    Grid(Grid const &other) // Принял константную ссылку на другой объект Grid
+    : data(new T[other.y_size * other.x_size]), // тут же выделяем память под новую data
+      y_size(other.y_size), x_size(other.x_size) { // скопировали размеры из other
         for (size_type i = 0; i < y_size * x_size; ++i) {
-            data[i] = other.data[i];
+            data[i] = other.data[i]; // копируем
         }
     }
+
+// Пример: Grid<int> copy = original; - original и copy - два РАЗНЫХ объекта с одинаковыми данными
     
-    // Оператор присваивания копированием
-    Grid& operator=(Grid const &other) {
-        if (this != &other) {
-            delete[] data;
+    // ТРИ - Оператор присваивания копированием (сносит существующую сетку и перезаписывает)
+    Grid& operator=(Grid const &other) { // принимает ссылку на присваиваемый Grid, отдает ссылку на текущий Grid
+        if (this != &other) { // Если два Grid'a не равны
+            delete[] data; // сносим все
             
-            y_size = other.y_size;
+            y_size = other.y_size; 
             x_size = other.x_size;
-            data = new T[y_size * x_size];
+            data = new T[y_size * x_size]; 
             for (size_type i = 0; i < y_size * x_size; ++i) {
-                data[i] = other.data[i];
+                data[i] = other.data[i]; // Снова копируем размеры, выделяем новую память, поштучно копируем данные 
             }
         }
-        return *this;
+        return *this; // Возвращаем ссылку на рассматриваемый грид
     }
+
+// Пример: gridB = gridA; - gridB становится копией gridA
     
-    // Конструктор перемещения
-    Grid(Grid &&other) 
-    : data(other.data), y_size(other.y_size), x_size(other.x_size) {
-        other.data = nullptr;
-        other.y_size = 0;
-        other.x_size = 0;
+    // ЧЕТЫРЕ - Конструктор перемещения
+    Grid(Grid &&other) // Принял ссылку на временный объект other 
+    : data(other.data), y_size(other.y_size), x_size(other.x_size) { // Выделили память и скопировали размер и ссылку на данные
+        other.data = nullptr; // обнулили ссылку на данные в старом гриде
+        other.y_size = 0; // размер обнулили
+        other.x_size = 0; // размер обнулили
     }
+
+// Пример: Grid<int> gridMoved = VremennyGrid();  - Вместо копирования элементов просто "забрали" память временного объекта
     
-    // Оператор присваивания перемещением
+    // ПЯТЬ - Оператор присваивания перемещением - правило пяти закрыли
     Grid& operator=(Grid &&other) {
         if (this != &other) {
             delete[] data;
@@ -81,6 +94,8 @@ public:
         }
         return *this;
     }
+
+// Пример: existingGrid = Grid<int>(3, 3, 99); - Старая память existingGrid освобождена, забрали память временного объекта
     
     // Методы доступа к размерам
     size_type get_y_size() const { return y_size; }
